@@ -9,8 +9,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from loss import MA_GP, predict_loss, words_loss, sent_loss, PerceptualLoss
-from model_oxford import NetG, NetD, CNN_ENCODER, RNN_ENCODER
-from datasets_oxford import TextDataset, prepare_data
+from model import NetG, NetD, CNN_ENCODER, RNN_ENCODER
+from datasets import TextDataset, prepare_data
 from torch.autograd import Variable
 from maskgenerator import random_regular_mask, center_mask, random_irregular_mask
 
@@ -102,7 +102,7 @@ if args.resume:
     print('Models restored')
 
 image_encoder = CNN_ENCODER(args.image_size)
-img_encoder_path = './output/output/Model/image_encoder250.pth'
+img_encoder_path = './DAMSMencoders/cub200-2011/image_encoder200.pth'
 state_dict = torch.load(img_encoder_path, map_location=lambda storage, loc: storage)
 image_encoder.load_state_dict(state_dict)
 for p in image_encoder.parameters():
@@ -111,7 +111,7 @@ print('Load image encoder from:', img_encoder_path)
 image_encoder.eval()
 
 text_encoder = RNN_ENCODER(dataset_train.n_words, nhidden=args.image_size)
-text_encoder_path = './output/output/Model/text_encoder250.pth'
+text_encoder_path = './DAMSMencoders/cub200-2011/text_encoder200.pth'
 state_dict = torch.load(text_encoder_path, map_location=lambda storage, loc: storage)
 text_encoder.load_state_dict(state_dict)
 for p in text_encoder.parameters():
