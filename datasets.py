@@ -47,23 +47,9 @@ def prepare_data(data):
 
 
 
-
-'''data_dir = "/home/hdd1/hdkim/mmfl/data/birds"
-split = "train"
-transform = transforms.Compose([
-    transforms.Resize((256, 256)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomGrayscale(),
-])'''
-
-
 def get_imgs(img_path, BRANCH_NUM, imsize, bbox,
             transform=None, normalize=None):
     
-    # 출력은 base_size와 BRANCH_NUM을 이용하여 (base_size)x(base_size), (base_size x 2)x(base_size x 2), ... , (args.image_size)x(args.image_size) 의 크기를 갖는 이미지 텐서들
-    # 예를 들어 base_size=64, BRANCH_NUM=2 일때 두가지 이미지 텐서 출력하며, 사이즈는 첫번째가 3x64x64, 두번째가 3x256x256 
-    # offical 코드에서 train할 때는 인덱스에 -1을 무조건 주어서 3x(args.image_size)x(args.image_size) 이미지 텐서 이용
-            
     img = Image.open(img_path).convert('RGB')
     width, height = img.size
     if bbox is not None:
@@ -151,13 +137,12 @@ class TextDataset(data.Dataset):
         self.number_example = len(self.filenames)
 
     def load_bbox(self): 
-        # {'200.Common_Yellowthroat/Common_Yellowthroat_0055_190967': [x-left, y-top, width, height], ' ' : []} 이런 형태의 원소 11788개의 dictionary
-        
+     
         data_dir = self.data_dir
         bbox_path = os.path.join(data_dir, 'bounding_boxes.txt') # 11788개
         df_bounding_boxes = pd.read_csv(bbox_path,
-                                        delim_whitespace=True, # delim_whitespace는 공백으로 구분된 파일 읽을때 사용
-                                        header=None).astype(int) # 불러올 데이터가 header가 없을때
+                                        delim_whitespace=True, 
+                                        header=None).astype(int)
         
         filepath = os.path.join(data_dir, 'images.txt') # 11788개 
         df_filenames = \
@@ -166,25 +151,23 @@ class TextDataset(data.Dataset):
         filenames = df_filenames[1].tolist() #df_filenames[0]은 1~11788까지의 index
         print('Total filenames: ', len(filenames))
         
-        filename_bbox = {img_file[:-4]: [] for img_file in filenames} # [:-4]로 끝의 .jpg 제거. dictionary임
-        # {'200.Common_Yellowthroat/Common_Yellowthroat_0055_190967': []} 이런 형태
+        filename_bbox = {img_file[:-4]: [] for img_file in filenames} 
+      
         
         numImgs = len(filenames) # 11788
         for i in range(0, numImgs):
             # bbox = [x-left, y-top, width, height]
             bbox = df_bounding_boxes.iloc[i][1:].tolist()
 
-            key = filenames[i][:-4] # key는 .jpg 뗀 파일 이름
-            filename_bbox[key] = bbox # {'200.Common_Yellowthroat/Common_Yellowthroat_0055_190967': [x-left, y-top, width, height]} 이런 형태
+            key = filenames[i][:-4] 
+            filename_bbox[key] = bbox
         
         return filename_bbox
 
 
 
     def load_filenames(self, data_dir, split):
-        # split(train or test) 데이터의 filenames가 담긴 pickle 파일 불러와서 리스트에 저장. 
-        # 출력은 [' ', '200.Common_Yellowthroat/Common_Yellowthroat_0055_190967', ' '] 이런 형태의 원소 8855개의 리스트
-        
+    
         filepath = '%s/%s/filenames.pickle' % (data_dir, split)
         if os.path.isfile(filepath):
             with open(filepath, 'rb') as f:
@@ -198,11 +181,7 @@ class TextDataset(data.Dataset):
 
 
     def load_captions(self, data_dir, filenames): 
-        # 출력은 [[], ... , ['a', 'bird', 'with', 'a', 'very', 'long', 'wing', 'span', 'and', 'a', 'long', 'pointed', 'beak'], ..., []] 이런 형태의 리스트
-        # train인 경우 리스트의 원소의 갯수는 88550
-        
-
-        
+      
         all_captions = []
         for i in range(len(filenames)):
             cap_path = '%s/text_flower/%s.txt' % (data_dir, filenames[i])
@@ -241,14 +220,8 @@ class TextDataset(data.Dataset):
 
     def build_dictionary(self, train_captions, test_captions):
         
-        # 출력은 [train_captions_new, test_captions_new, ixtoword, wordtoix, len(ixtoword)] 이렇게 총 5가지
-        # train_captions_new는 8855개의 train 이미지에서 각각 10개의 caption안의 단어를 dictionary에 매핑한 리스트. [[], ... , [18, 19, 1, 26, 8, 14, 2, 3, 1, 85, 22, 8, 52, 36, 11, 107, 108]], ... , []] 형태
-        # test_captions_new도 마찬가지
-        # ixtoword는 {0: '<end>', 1: 'a', 2: 'bird', 3: 'with', 4: 'very', ... , 5448: 'frontside', 5449: 'wrapped'} 형태의 dictionary
-        # wordtoix는 {'<end>': 0, 'a': 1, 'bird': 2, 'with': 3, 'very': 4, ... , 'frontside': 5448, 'wrapped': 5449} 형태의 dictionary
-        # len(ixtoword)는 5450
         
-        word_counts = defaultdict(float) # defaultdict()는 dictionary에 없는 키에 접근해도 KeyError 발생시키지 않고 default값 반환
+        word_counts = defaultdict(float)
         captions = train_captions + test_captions
         for sent in captions:
             for word in sent:
@@ -291,10 +264,7 @@ class TextDataset(data.Dataset):
 
 
     def load_text_data(self, data_dir, split):
-        # 이 함수의 출력이 바로 TextDataset 클래스의 self.filenames, self.captions, self.ixtoword, self.wordtoix, self.n_words
-        # 출력은 filenames에 build_dictionary()를 거치고 나온 captions, ixtoword, wordtoix, n_words(사전 길이)
-        # buid_dictionary()의 결과를 pickle로 저장되어있지 않으면 저장하고 pick을 load하여 출력하는 함수
-        
+      
         filepath = os.path.join(data_dir, 'captions.pickle')
         train_names = self.load_filenames(data_dir, 'train')
         #print("train_names:", train_names)
@@ -339,8 +309,7 @@ class TextDataset(data.Dataset):
 
 
     def load_class_id(self, data_dir, total_num): 
-        # 출력은 학습 데이터인 경우 총 8850개로 [2, 2, 2, 2, ..., 2, 3, 3, 3, ... , 3, ... , 200, 200, ... , 200] 이런 형태. 1부터 200까지의 bird 클래스를 train과 test셋이 나눠가짐
-        
+       
         if os.path.isfile(data_dir + '/class_info.pickle'):
             with open(data_dir + '/class_info.pickle', 'rb') as f:
                 class_id = pickle.load(f, encoding='bytes')
@@ -353,11 +322,6 @@ class TextDataset(data.Dataset):
 
 
     def get_caption(self, sent_ix):
-        
-        # 출력은 [[args.WORDS_NUM], 1] 의 넘파이 배열과 word의 갯수(상한은 WORDS_NUM)으로 caption의 길이가 WORDS_NUM 보다 짧으면 나머지 뒷부분은 0으로, 길면 shuffle한 다음 딱 WORDS_NUM 까지만 남김
-        
-        # a list of indices for a sentence
-        sent_caption = np.asarray(self.captions[sent_ix]).astype('int64') # np.array는 copy=True가 디폴트, np.asarray는 copy=False가 디폴트
         
         if (sent_caption == 0).sum() > 0:
             print('ERROR: do not need END (0) token', sent_caption)
