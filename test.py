@@ -22,16 +22,16 @@ import cv2
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=str, default='flower')
-parser.add_argument('--root', type=str, default='/home/hdkim/text_guided_inpainting_ssa/data_oxford')
+parser.add_argument('--root', type=str, default='./data/cub-200-2011')
 parser.add_argument('--CAPTIONS_PER_IMAGE', type=int, default=10)
 parser.add_argument('--checkpoint', type=str, default='./snapshots/ckpt/',
                     help='The filename of pickle checkpoint.')
 parser.add_argument('--WORDS_NUM', type=int, default=16)
 parser.add_argument('--BRANCH_NUM', type=int, default=1)
 parser.add_argument('--base_size', type=int, default=256)
-parser.add_argument('--save_dir', type=str, default='./test_oxford/20_50/three')
-parser.add_argument('--save_only', type=str, default='./test_oxford/20_50/only')
-parser.add_argument('--save_real', type=str, default='./test_oxford/20_50/real')
+parser.add_argument('--save_dir', type=str, default='./test/cub-200-2011/20_50/three')
+parser.add_argument('--save_only', type=str, default='./test/cub-200-2011/20_50/only')
+parser.add_argument('--save_real', type=str, default='./test/cub-200-2011/20_50/real')
 parser.add_argument('--batch_size', type=int, default=8)
 parser.add_argument('--image_size', type=int, default=256)
 parser.add_argument('--gpu', type=str, default="0,1,2")
@@ -68,7 +68,7 @@ print(len(test_set))
 ixtoword_test = dataset_test.ixtoword
 
 text_encoder = RNN_ENCODER(dataset_test.n_words, nhidden=args.image_size)
-text_encoder_path = './output/output/Model/text_encoder250.pth'
+text_encoder_path = './DAMSMencoders/cub-200-2011/text_encoder200.pth'
 state_dict = torch.load(text_encoder_path, map_location=lambda storage, loc: storage)
 text_encoder.load_state_dict(state_dict)
 for p in text_encoder.parameters():
@@ -148,10 +148,10 @@ noise = Variable(torch.FloatTensor(args.batch_size, nz))
 if use_cuda:
     noise = noise.cuda()
 
-for i in range(3):
+for i in range():
 
-    base = 126000
-    interval = 3000 # iteration 간격. 조절 필수!!
+    base = 0
+    interval = 0
 
     if not os.path.exists(args.save_dir + str(base + i * interval)):
         os.makedirs('{:s}'.format(args.save_dir + str(base + i * interval)))
@@ -186,7 +186,7 @@ for i in range(3):
             
         
         img = imgs[-1]
-        mask = load_mask(img, min=20, max=50)       ############################################# 마스크 범위 조정 필수 ###################################################
+        mask = load_mask(img, min=20, max=50)       
         masked = img * (1. - mask)
         
         noise.data.normal_(0, 1)
