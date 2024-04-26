@@ -1,6 +1,3 @@
-# synthesis 시, 아예 객체가 가려져있을 경우, 새로 생성하는 관점에서 encoding된 주변 정보가 크게 도움을 줄 수 없어서 visual artifact발생.
-# 마스킹된 부분 주변에 그려야하는 객체와 관련 있는 부분이 없을 경우, affine 하는 부분에서 해당 정보를 고려하도록 해야할듯.
-
 import math
 import torch
 from torch import nn
