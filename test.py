@@ -9,9 +9,9 @@ import torch
 import torch.nn as nn
 from torchvision import transforms
 
-from model_oxford import NetG, RNN_ENCODER
+from model import NetG, RNN_ENCODER
 
-from datasets_oxford import TextDataset, prepare_data
+from datasets import TextDataset, prepare_data
 from torch.autograd import Variable
 from tqdm.auto import tqdm
 
