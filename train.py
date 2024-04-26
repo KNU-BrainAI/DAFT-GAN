@@ -23,7 +23,7 @@ warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', type=str, default='flower')
-parser.add_argument('--root', type=str, default='/home/hdkim/text_guided_inpainting_ssa/data_oxford')
+parser.add_argument('--root', type=str, default='./data/cub-200-2011')
 parser.add_argument('--CAPTIONS_PER_IMAGE', type=int, default=10)
 parser.add_argument('--WORDS_NUM', type=int, default=16)
 parser.add_argument('--BRANCH_NUM', type=int, default=1)
